@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Products {
+  id Int @id @default(autoincrement())
+  videoLink String?
+  affiliateLink String
+  enabled Boolean @default(true)
+  categoryId Int
+  created DateTime @default(now()) 
+
+  productComments ProductComments[]
+}
+
+model Categories {
+  id Int @id @default(autoincrement()) 
+  enabled Boolean @default(true)
+  created DateTime @default(now())  
+  categoryLanguages CategoryLanguages[] // Define relation to CategoryLanguage
+}
+
+model CategoryLanguages {
+  id Int @id @default(autoincrement())
+  alias String 
+  name String?  
+  categoryId Int 
+  category Categories @relation(fields: [categoryId], references: [id]) // Define relation to Categories 
+}
+ 
+model Users {
+  id Int @id @default(autoincrement()) 
+  email String
+  phone String
+  enabled Boolean @default(true)
+  created DateTime @default(now())   
+
+  productComments ProductComments[]
+}
+
+model ProductComments {
+  id Int @id @default(autoincrement())
+  alias String 
+  name String?  
+  productId Int 
+  product Products @relation(fields: [productId], references: [id]) // Define relation to Categories 
+  userId Int 
+  user Users @relation(fields: [userId], references: [id])
+} 
+
+model ProductComments {
+  id Int @id @default(autoincrement())
+  alias String 
+  name String?  
+  productId Int 
+  product Products @relation(fields: [productId], references: [id]) // Define relation to Categories 
+  userId Int 
+  user Users @relation(fields: [userId], references: [id])
+} 
