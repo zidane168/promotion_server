@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,58 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Products {
-  id Int @id @default(autoincrement())
-  videoLink String?
-  affiliateLink String
-  enabled Boolean @default(true)
+model categories {
+  id                 Int                  @id @default(autoincrement())
+  enabled            Boolean              @default(true)
+  created            DateTime             @default(now()) @db.DateTime(0)
+  category_languages category_languages[]
+}
+
+model products {
+  id               Int                @id @default(autoincrement())
+  categoryId       Int
+  videoLink        String?
+  affiliateLink    String
+  description      String?
+  enabled          Boolean            @default(true)
+  created          DateTime           @default(now()) @db.DateTime(0)
+  product_comments product_comments[]
+  product_ratings  product_ratings[]
+}
+
+model users {
+  id               Int                @id @default(autoincrement())
+  email            String
+  phone            String
+  enabled          Boolean            @default(true)
+  created          DateTime           @default(now())
+  product_comments product_comments[]
+  product_ratings  product_ratings[]
+}
+
+model category_languages {
+  id         Int        @id @default(autoincrement())
+  alias      String
+  name       String?
   categoryId Int
-  created DateTime @default(now()) 
+  categories categories @relation(fields: [categoryId], references: [id], map: "CategoryLanguages_categoryId_fkey")
 
-  productComments ProductComments[]
+  @@index([categoryId], map: "CategoryLanguages_categoryId_fkey")
 }
 
-model Categories {
-  id Int @id @default(autoincrement()) 
-  enabled Boolean @default(true)
-  created DateTime @default(now())  
-  categoryLanguages CategoryLanguages[] // Define relation to CategoryLanguage
+model product_comments {
+  id        Int      @id @default(autoincrement())
+  comment   String?
+  productId Int
+  userId    Int
+  enabled   Boolean  @default(true)
+  created   DateTime @default(now()) @db.DateTime(0)
+  products  products @relation(fields: [productId], references: [id], map: "ProductComments_productId_fkey")
+  users     users    @relation(fields: [userId], references: [id], map: "ProductComments_userId_fkey")
+
+  @@index([productId], map: "ProductComments_productId_fkey")
+  @@index([userId], map: "ProductComments_userId_fkey")
 }
 
-model CategoryLanguages {
-  id Int @id @default(autoincrement())
-  alias String 
-  name String?  
-  categoryId Int 
-  category Categories @relation(fields: [categoryId], references: [id]) // Define relation to Categories 
+model product_ratings {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @db.SmallInt
+  productId Int
+  userId    Int
+  enabled   Boolean  @default(true)
+  created   DateTime @default(now()) @db.DateTime(0)
+  products  products @relation(fields: [productId], references: [id], map: "ProductRatings_productId_fkey")
+  users     users    @relation(fields: [userId], references: [id], map: "ProductRatings_userId_fkey")
+
+  @@index([productId], map: "ProductRatings_productId_fkey")
+  @@index([userId], map: "ProductRatings_userId_fkey")
 }
- 
-model Users {
-  id Int @id @default(autoincrement()) 
-  email String
-  phone String
-  enabled Boolean @default(true)
-  created DateTime @default(now())   
-
-  productComments ProductComments[]
-}
-
-model ProductComments {
-  id Int @id @default(autoincrement())
-  alias String 
-  name String?  
-  productId Int 
-  product Products @relation(fields: [productId], references: [id]) // Define relation to Categories 
-  userId Int 
-  user Users @relation(fields: [userId], references: [id])
-} 
-
-model ProductComments {
-  id Int @id @default(autoincrement())
-  alias String 
-  name String?  
-  productId Int 
-  product Products @relation(fields: [productId], references: [id]) // Define relation to Categories 
-  userId Int 
-  user Users @relation(fields: [userId], references: [id])
-} 
