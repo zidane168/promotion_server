@@ -16,27 +16,15 @@ let ProductsService = class ProductsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(createProductDto) {
-        return 'This action adds a new product';
-    }
-    findAll(params) {
+    async findAll(params) {
         const { skip, take, cursor, where, orderBy } = params;
-        return this.prisma.products.findMany({
+        return await this.prisma.products.findMany({
             skip,
             take,
             cursor,
             where,
             orderBy
         });
-    }
-    findOne(id) {
-        return `This action returns a #${id} product`;
-    }
-    update(id, updateProductDto) {
-        return `This action updates a #${id} product`;
-    }
-    remove(id) {
-        return `This action removes a #${id} product`;
     }
 };
 exports.ProductsService = ProductsService;

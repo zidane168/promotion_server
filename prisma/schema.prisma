@@ -17,9 +17,10 @@ model categories {
 model products {
   id               Int                @id @default(autoincrement())
   categoryId       Int
+  title           String?            @db.VarChar(1024)
   videoLink        String?
   affiliateLink    String
-  description      String?
+  description      String?            @db.Text
   enabled          Boolean            @default(true)
   created          DateTime           @default(now()) @db.DateTime(0)
   product_comments product_comments[]

@@ -15,42 +15,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsController = void 0;
 const common_1 = require("@nestjs/common");
 const products_service_1 = require("./products.service");
+const swagger_1 = require("@nestjs/swagger");
 let ProductsController = class ProductsController {
     constructor(productsService) {
         this.productsService = productsService;
     }
-    findAll(page, limit, condition) {
-        const skip = (limit * page) - 1;
-        const take = page;
-        const where = [
-            'descriptions LIKE'
-        ];
+    async findAll(page, limit, condition) {
+        const pageNumber = parseInt(page) || 1;
+        const limitNumber = parseInt(limit) || 10;
+        const skip = (limitNumber * (pageNumber - 1));
+        const take = limitNumber;
+        const where = condition ? {
+            OR: [
+                {
+                    description: {
+                        contains: condition
+                    },
+                },
+                {
+                    title: {
+                        contains: condition
+                    },
+                },
+            ],
+        } : undefined;
         const params = {
-            skip, take, where
+            skip,
+            take,
+            ...(where && { where }),
+            orderBy: { id: 'desc' }
         };
-        return this.productsService.findAll(params);
-    }
-    findOne(id) {
-        return this.productsService.findOne(+id);
+        return await this.productsService.findAll(params);
     }
 };
 exports.ProductsController = ProductsController;
 __decorate([
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number, description: 'Page number for pagination' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Number of items to return per page' }),
+    (0, swagger_1.ApiQuery)({ name: 'condition', required: false, type: String, description: 'Condition to filter results' }),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('condition')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ProductsController.prototype, "findOne", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
     __metadata("design:paramtypes", [products_service_1.ProductsService])
