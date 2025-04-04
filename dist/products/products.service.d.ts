@@ -9,5 +9,8 @@ export declare class ProductsService {
         cursor?: Prisma.productsWhereUniqueInput;
         where?: Prisma.productsWhereInput;
         orderBy?: Prisma.productsOrderByWithRelationInput;
-    }): Promise<products[]>;
+    }): Promise<{
+        count: number;
+        items: products[];
+    }>;
 }

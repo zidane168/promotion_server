@@ -21,15 +21,19 @@ export class ProductsService {
     cursor?: Prisma.productsWhereUniqueInput;
     where?: Prisma.productsWhereInput;
     orderBy?: Prisma.productsOrderByWithRelationInput;
-  }) : Promise<products[]> {
+  }) : Promise< {count: number, items: products[]} > {
     const { skip, take, cursor, where, orderBy } = params;
-    return await this.prisma.products.findMany({
+
+    const count = await this.prisma.products.count({ where })
+    const items: products[] = await this.prisma.products.findMany({
       skip,
       take, 
       cursor,
       where,
       orderBy
     })
+
+    return { count, items }
   }
 
   // findOne(id: number) {

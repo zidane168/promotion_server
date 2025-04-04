@@ -16,36 +16,50 @@ exports.ProductsController = void 0;
 const common_1 = require("@nestjs/common");
 const products_service_1 = require("./products.service");
 const swagger_1 = require("@nestjs/swagger");
+const pagination_service_1 = require("../ultis/http/pagination/pagination.service");
 let ProductsController = class ProductsController {
-    constructor(productsService) {
+    constructor(productsService, paginationService) {
         this.productsService = productsService;
+        this.paginationService = paginationService;
     }
-    async findAll(page, limit, condition) {
+    async findAll(page, limit, condition, categoryId) {
         const pageNumber = parseInt(page) || 1;
         const limitNumber = parseInt(limit) || 10;
+        let categoryIdNumber = 1;
+        if (categoryId) {
+            categoryIdNumber = parseInt(categoryId) || 1;
+        }
         const skip = (limitNumber * (pageNumber - 1));
         const take = limitNumber;
-        const where = condition ? {
-            OR: [
-                {
-                    description: {
-                        contains: condition
+        const where = {
+            ...(categoryId && { categoryId: categoryIdNumber }),
+            ...(condition && {
+                OR: [
+                    {
+                        description: {
+                            contains: condition
+                        },
                     },
-                },
-                {
-                    title: {
-                        contains: condition
+                    {
+                        title: {
+                            contains: condition
+                        },
                     },
-                },
-            ],
-        } : undefined;
+                ],
+            })
+        };
         const params = {
             skip,
             take,
             ...(where && { where }),
             orderBy: { id: 'desc' }
         };
-        return await this.productsService.findAll(params);
+        const { count, items } = await this.productsService.findAll(params);
+        const totalPage = this.paginationService.totalPage(count, limitNumber);
+        return {
+            _pagination: { count, totalPage },
+            data: items,
+        };
     }
 };
 exports.ProductsController = ProductsController;
@@ -53,16 +67,19 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number, description: 'Page number for pagination' }),
     (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Number of items to return per page' }),
     (0, swagger_1.ApiQuery)({ name: 'condition', required: false, type: String, description: 'Condition to filter results' }),
+    (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false, type: String, description: 'CategoryId to filter results' }),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('condition')),
+    __param(3, (0, common_1.Query)('categoryId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "findAll", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
-    __metadata("design:paramtypes", [products_service_1.ProductsService])
+    __metadata("design:paramtypes", [products_service_1.ProductsService,
+        pagination_service_1.PaginationService])
 ], ProductsController);
 //# sourceMappingURL=products.controller.js.map

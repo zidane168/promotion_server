@@ -18,13 +18,15 @@ let ProductsService = class ProductsService {
     }
     async findAll(params) {
         const { skip, take, cursor, where, orderBy } = params;
-        return await this.prisma.products.findMany({
+        const count = await this.prisma.products.count({ where });
+        const items = await this.prisma.products.findMany({
             skip,
             take,
             cursor,
             where,
             orderBy
         });
+        return { count, items };
     }
 };
 exports.ProductsService = ProductsService;
